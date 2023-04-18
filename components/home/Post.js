@@ -2,14 +2,39 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { Divider } from "react-native-elements";
 
+import { firebase, db } from "../../firebase/firebase";
+
 const Post = ({ post }) => {
+  const handleLike = (post) => {
+    const currentLikeStatus = !post.likes_by_users.includes(
+      firebase.auth().currentUser.email
+    );
+    db.collection("users")
+      .doc(post.owner_email)
+      .collection("posts")
+      .doc(post.id)
+      .update({
+        likes_by_users: currentLikeStatus
+          ? firebase.firestore.FieldValue.arrayUnion(
+              firebase.auth().currentUser.email
+            )
+          : firebase.firestore.FieldValue.arrayRemove(
+              firebase.auth().currentUser.email
+            ),
+      })
+      .then(() => console.log("Like Counted"))
+      .catch((error) => {
+        console.log("Error updating document:", error);
+      });
+  };
+
   return (
     <View style={{ marginBottom: 30 }}>
       <Divider width={1} orientation="vertical" />
       <PostHeader post={post} />
       <PostImage post={post} />
       <View style={{ marginHorizontal: 15, marginTop: 10 }}>
-        <PostFooter post={post} />
+        <PostFooter post={post} handleLike={handleLike} />
         <Likes post={post} />
         <Caption post={post} />
         <CommentSection post={post} />
@@ -32,12 +57,23 @@ const Comments = ({ post }) => (
   </>
 );
 
+// const CommentSection = ({ post }) => (
+//   <View style={{ marginTop: 5 }}>
+//     {!!post?.comments?.length && (
+//       <Text style={{ color: "gray", fontSize: 11 }}>
+//         View {post?.comments?.length > 1 ? "all" : ""}{" "}
+//         {post?.comments?.length > 1 ? "comments" : "comment"}
+//       </Text>
+//     )}
+//   </View>
+// );
+
 const CommentSection = ({ post }) => (
   <View style={{ marginTop: 5 }}>
-    {!!post.comments.length && (
+    {!!post?.comments?.length && (
       <Text style={{ color: "gray", fontSize: 11 }}>
-        View {post.comments.length > 1 ? "all" : ""}{" "}
-        {post.comments.length > 1 ? "comments" : "comment"}
+        View {post?.comments?.length > 1 ? "all" : ""}{" "}
+        {post?.comments?.length > 1 ? "comments" : "comment"}
       </Text>
     )}
   </View>
@@ -54,23 +90,36 @@ const Caption = ({ post }) => (
 
 const Likes = ({ post }) => (
   <Text
-    style={{ color: "white", fontSize: 9, fontWeight: "600", marginTop: 4 }}
+    style={{
+      color: "white",
+      fontSize: 9,
+      fontWeight: "600",
+      // marginTop: 4,
+      marginLeft: 12,
+    }}
   >
-    {post.likes.toLocaleString("en")}
+    {post.likes_by_users.length.toLocaleString("en")}
   </Text>
 );
 
-const PostFooter = () => {
+const PostFooter = ({ handleLike, post }) => {
   return (
     <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
       <View style={style.LeftFooterIconsContainer}>
+        <TouchableOpacity onPress={() => handleLike(post)}>
+          <Image
+            style={style.footerIcon}
+            source={
+              post.likes_by_users.includes(firebase.auth().currentUser.email)
+                ? require("../../assets/interface-icon-like-active.png")
+                : require("../../assets/interface-icon-like-inactive.png")
+            }
+          />
+        </TouchableOpacity>
+
         <Icon
           imgStyle={style.footerIcon}
-          img={require("../../assets/instagram-icon-heart.png")}
-        />
-        <Icon
-          imgStyle={style.footerIcon}
-          img={require("../../assets/instagram-icon-chat-bubble.png")}
+          img={require("../../assets/instagram-icon-comment.png")}
         />
         <Icon
           imgStyle={style.footerIcon}
@@ -117,7 +166,7 @@ const PostHeader = ({ post }) => (
     }}
   >
     <View style={{ flexDirection: "row", alignItems: "center" }}>
-      <Image source={{ uri: post.profilePicture }} style={style.story} />
+      <Image source={{ uri: post.profile_picture }} style={style.story} />
       <Text
         style={{
           color: "white",
@@ -145,8 +194,8 @@ const style = StyleSheet.create({
   footerIcon: {
     width: 25,
     height: 25,
-    // marginTop:5,
-    tintColor: "white",
+    margin: 5,
+    // tintColor: "white",
   },
   LeftFooterIconsContainer: {
     flexDirection: "row",

@@ -23,11 +23,18 @@ const LoginForm = ({ navigation }) => {
       .then((userCredential) => {
         // User successfully authenticated
         firebase.auth().signInWithEmailAndPassword(email, password);
-        console.log("Signed In");
+        console.log("Signed In,", userCredential);
       })
       .catch((error) => {
         // Error occurred during authentication
-        Alert.alert(error.message);
+        Alert.alert(
+          "My Lord... ",
+          error.message + "\n\n ... What would you like to do next?",
+          [
+            { text: "OK", onPress: () => console.log("OK"), style: "cancel" },
+            { text: "Sign up", onPress: () => navigation.push("SignupScreen") },
+          ]
+        );
       });
   };
 

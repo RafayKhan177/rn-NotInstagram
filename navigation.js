@@ -13,7 +13,21 @@ const screenOption = {
   headerShown: false,
 };
 
-const SignedInStack = () => {
+export const SignedInStack = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        initialRouteName="HomeScreen"
+        screenOptions={screenOption}
+      >
+        <Stack.Screen name="HomeScreen" component={HomeScreen} />
+        <Stack.Screen name="NewPostScreen" component={NewPostScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export const SignedOutStack = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -22,11 +36,7 @@ const SignedInStack = () => {
       >
         <Stack.Screen name="SignupScreen" component={SignupScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} />
-        <Stack.Screen name="NewPostScreen" component={NewPostScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
-
-export default SignedInStack;
