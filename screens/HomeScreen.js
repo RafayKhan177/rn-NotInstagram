@@ -15,7 +15,9 @@ const HomeScreen = ({ navigation }) => {
     db.collectionGroup("posts")
       // .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
-        setPosts(snapshot.docs.map((post) => ({ id: post.id, ...post.data() })));
+        setPosts(
+          snapshot.docs.map((post) => ({ id: post.id, ...post.data() }))
+        );
       });
   }, []);
   return (
@@ -35,6 +37,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#0a0a0a",
+    marginTop: 30,
     flex: 1,
   },
 });
